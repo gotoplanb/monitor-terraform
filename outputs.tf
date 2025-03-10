@@ -16,4 +16,14 @@ output "cloudflare_url" {
 output "zero_trust_app_id" {
   description = "The ID of the Zero Trust application"
   value       = cloudflare_access_application.app.id
+}
+
+output "api_gateway_url" {
+  description = "API Gateway URL"
+  value       = "${aws_apigatewayv2_api.api.api_endpoint}/${var.api_stage_name}"
+}
+
+output "lambda_function_name" {
+  description = "Name of the Lambda function"
+  value       = aws_lambda_function.api.function_name
 } 

@@ -12,6 +12,10 @@ terraform {
       source  = "SumoLogic/sumologic"
       version = "~> 2.0"
     }
+    aws = {
+      source  = "hashicorp/aws"
+      version = "~> 5.0"
+    }
   }
 
   backend "s3" {
@@ -34,4 +38,8 @@ provider "cloudflare" {
 provider "sumologic" {
   # Credentials can be provided via environment variables:
   # SUMOLOGIC_ACCESSID and SUMOLOGIC_ACCESSKEY
+}
+
+provider "aws" {
+  region = var.aws_region
 } 

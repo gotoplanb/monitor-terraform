@@ -76,4 +76,63 @@ variable "monitor_time_range" {
 variable "notification_email" {
   description = "Email address for monitor notifications"
   type        = string
+}
+
+variable "aws_region" {
+  description = "AWS region for Lambda deployment"
+  type        = string
+  default     = "us-west-2"
+}
+
+variable "lambda_name" {
+  description = "Name of the Lambda function"
+  type        = string
+  default     = "monitors-api"
+}
+
+variable "api_stage_name" {
+  description = "API Gateway stage name"
+  type        = string
+  default     = "prod"
+}
+
+variable "lambda_runtime" {
+  description = "Lambda runtime for Python"
+  type        = string
+  default     = "python3.11"
+}
+
+variable "lambda_memory" {
+  description = "Lambda function memory in MB"
+  type        = number
+  default     = 256
+}
+
+variable "lambda_timeout" {
+  description = "Lambda function timeout in seconds"
+  type        = number
+  default     = 30
+}
+
+variable "api_repository_url" {
+  description = "Git repository URL for the API"
+  type        = string
+}
+
+variable "api_repository_branch" {
+  description = "Git branch to deploy"
+  type        = string
+  default     = "main"
+}
+
+variable "full_access_users" {
+  description = "List of email addresses allowed to use all HTTP methods"
+  type        = list(string)
+  default     = []
+}
+
+variable "readonly_users" {
+  description = "List of email addresses allowed to use only GET requests"
+  type        = list(string)
+  default     = []
 } 

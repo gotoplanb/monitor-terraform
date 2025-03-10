@@ -17,16 +17,49 @@ resource "cloudflare_access_application" "app" {
   auto_redirect_to_identity = true
 }
 
-# Access Policy for the application
-resource "cloudflare_access_policy" "allow_users" {
+# Policy for users with full access (all HTTP methods)
+resource "cloudflare_access_policy" "allow_full_access" {
   application_id = cloudflare_access_application.app.id
   zone_id       = var.cloudflare_zone_id
-  name          = "Allow specific users"
+  name          = "Allow full access users"
   precedence    = "1"
   decision      = "allow"
 
   include {
-    email = var.allowed_users
+    email = var.full_access_users
+  }
+}
+
+# Policy for read-only users (GET requests only)
+resource "cloudflare_access_policy" "allow_readonly_access" {
+  application_id = cloudflare_access_application.app.id
+  zone_id       = var.cloudflare_zone_id
+  name          = "Allow read-only users"
+  precedence    = "2"
+  decision      = "allow"
+
+  include {
+    email = var.readonly_users
+  }
+
+  # Only allow GET requests
+  require {
+    request {
+      methods = ["GET"]
+    }
+  }
+}
+
+# Deny all other requests from read-only users
+resource "cloudflare_access_policy" "deny_readonly_users_non_get" {
+  application_id = cloudflare_access_application.app.id
+  zone_id       = var.cloudflare_zone_id
+  name          = "Deny non-GET requests for read-only users"
+  precedence    = "3"
+  decision      = "deny"
+
+  include {
+    email = var.readonly_users
   }
 }
 
