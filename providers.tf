@@ -19,10 +19,10 @@ terraform {
   }
 
   backend "s3" {
-    bucket         = "your-terraform-state-bucket-name"
+    bucket         = "monitor-state-1742753260"
     key            = "monitors/terraform.tfstate"
-    region         = "us-west-2"
-    dynamodb_table = "your-terraform-locks-table-name"
+    region         = "us-east-1"
+    dynamodb_table = "monitor-state-1742753260"
     encrypt        = true
   }
 }
