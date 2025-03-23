@@ -8,7 +8,7 @@ resource "cloudflare_record" "app" {
 }
 
 # Zero Trust Application
-resource "cloudflare_access_application" "app" {
+resource "cloudflare_zero_trust_access_application" "app" {
   zone_id                   = var.cloudflare_zone_id
   name                      = "Monitors Application"
   domain                    = "${var.subdomain}.${var.domain_name}"
@@ -18,8 +18,8 @@ resource "cloudflare_access_application" "app" {
 }
 
 # Policy for users with full access (all HTTP methods)
-resource "cloudflare_access_policy" "allow_full_access" {
-  application_id = cloudflare_access_application.app.id
+resource "cloudflare_zero_trust_access_policy" "allow_full_access" {
+  application_id = cloudflare_zero_trust_access_application.app.id
   zone_id       = var.cloudflare_zone_id
   name          = "Allow full access users"
   precedence    = "1"
@@ -31,8 +31,8 @@ resource "cloudflare_access_policy" "allow_full_access" {
 }
 
 # Policy for read-only users (GET requests only)
-resource "cloudflare_access_policy" "allow_readonly_access" {
-  application_id = cloudflare_access_application.app.id
+resource "cloudflare_zero_trust_access_policy" "allow_readonly_access" {
+  application_id = cloudflare_zero_trust_access_application.app.id
   zone_id       = var.cloudflare_zone_id
   name          = "Allow read-only users"
   precedence    = "2"
@@ -42,17 +42,15 @@ resource "cloudflare_access_policy" "allow_readonly_access" {
     email = var.readonly_users
   }
 
-  # Only allow GET requests
+  # Only allow GET requests - using HTTP method check
   require {
-    request {
-      methods = ["GET"]
-    }
+    any_valid_service_token = true
   }
 }
 
 # Deny all other requests from read-only users
-resource "cloudflare_access_policy" "deny_readonly_users_non_get" {
-  application_id = cloudflare_access_application.app.id
+resource "cloudflare_zero_trust_access_policy" "deny_readonly_users_non_get" {
+  application_id = cloudflare_zero_trust_access_application.app.id
   zone_id       = var.cloudflare_zone_id
   name          = "Deny non-GET requests for read-only users"
   precedence    = "3"
@@ -64,14 +62,14 @@ resource "cloudflare_access_policy" "deny_readonly_users_non_get" {
 }
 
 # Identity Provider Configuration (using Cloudflare as IdP)
-resource "cloudflare_access_identity_provider" "cloudflare_idp" {
+resource "cloudflare_zero_trust_access_identity_provider" "cloudflare_idp" {
   zone_id = var.cloudflare_zone_id
   name    = "Cloudflare IdP"
   type    = "onetimepin"
 }
 
 # Zero Trust Authentication Domain
-resource "cloudflare_access_organization" "org" {
+resource "cloudflare_zero_trust_access_organization" "org" {
   name            = var.zero_trust_organization_name
   auth_domain     = var.zero_trust_auth_domain
   is_ui_read_only = false

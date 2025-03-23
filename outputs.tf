@@ -15,7 +15,7 @@ output "cloudflare_url" {
 
 output "zero_trust_app_id" {
   description = "The ID of the Zero Trust application"
-  value       = cloudflare_access_application.app.id
+  value       = cloudflare_zero_trust_access_application.app.id
 }
 
 output "api_gateway_url" {

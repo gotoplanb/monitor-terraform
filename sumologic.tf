@@ -1,41 +1,62 @@
-# Create a folder to organize monitors
-resource "sumologic_folder" "monitors" {
-  name        = "API Monitors"
-  description = "Folder containing API health monitors"
-}
-
-# Create a monitor
-resource "sumologic_monitor" "api_health" {
-  name         = var.monitor_name
-  description  = "Monitors API health status"
-  type         = "Metrics"
-  is_disabled  = false
-  content_type = "Monitor"
-  folder_id    = sumologic_folder.monitors.id
-
-  queries {
-    row_id = "A"
-    query  = var.monitor_query
+# Create a Sumo Logic Monitor
+resource "sumologic_monitor" "status_code_monitor" {
+  name              = "HTTP Status Code Monitor"
+  description       = "Monitor for 4xx and 5xx status codes in HTTP logs"
+  type              = "MonitorsLibraryMonitor"
+  content_type      = "Monitor"
+  monitor_type      = "Logs"
+  evaluation_delay  = "5m"
+  is_disabled       = false
+  tags = {
+    "team"        = "monitoring"
+    "application" = "sumologic"
   }
 
+  # Define the log query
+  queries {
+    row_id = "A"
+    query  = "_sourceCategory=terraform* | where status_code matches \"4*\" OR status_code matches \"5*\""
+  }
+
+  # Trigger conditions for critical and warning levels
   trigger_conditions {
-    threshold {
-      threshold_type   = "GreaterThanOrEqual"
-      threshold       = 1
-      time_range     = var.monitor_time_range
-      occurrence_type = "AtLeastOnce"
+    logs_static_condition {
+      critical {
+        time_range = "5m"
+        alert {
+          threshold      = 1.0
+          threshold_type = "GreaterThan"
+        }
+        resolution {
+          threshold      = 1.0
+          threshold_type = "LessThanOrEqual"
+        }
+      }
+      warning {
+        time_range = "5m"
+        alert {
+          threshold      = 1.0
+          threshold_type = "GreaterThan"
+        }
+        resolution {
+          threshold      = 1.0
+          threshold_type = "LessThanOrEqual"
+        }
+      }
     }
   }
 
+  # Notification settings
   notifications {
     notification {
       connection_type = "Email"
-      recipients     = [var.notification_email]
-      subject        = "API Health Alert: {{TriggerType}}"
-      message_body   = "Monitor {{Name}} is {{TriggerType}}\n\nDescription: {{Description}}\n\nTrigger Details: {{TriggerDetails}}"
-      time_zone     = "UTC"
+      recipients = [
+        "abc@example.com",
+      ]
+      subject      = "Monitor Alert: {{TriggerType}} on {{Name}}"
+      time_zone    = "PST"
+      message_body = "Triggered {{TriggerType}} Alert on {{Name}}: {{QueryURL}}"
     }
+    run_for_trigger_types = ["Critical", "ResolvedCritical", "Warning"]
   }
-
-  group_notifications = true
-} 
+}

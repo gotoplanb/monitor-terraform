@@ -15,6 +15,13 @@ resource "null_resource" "clone_repo" {
   }
 }
 
+# Output file for trigger
+resource "local_file" "lambda_zip_trigger" {
+  depends_on = [null_resource.clone_repo]
+  filename = "${path.module}/lambda_zip_created.txt"
+  content  = "Lambda zip created at ${timestamp()}"
+}
+
 # IAM role for Lambda
 resource "aws_iam_role" "lambda_role" {
   name = "${var.lambda_name}-role"
@@ -45,12 +52,15 @@ resource "aws_lambda_function" "api" {
   function_name    = var.lambda_name
   role            = aws_iam_role.lambda_role.arn
   handler         = "app.main.handler"
-  source_code_hash = filebase64sha256("/tmp/lambda_function.zip")
+  source_code_hash = local_file.lambda_zip_trigger.content_md5  # Use this as a trigger instead
   runtime         = var.lambda_runtime
   memory_size     = var.lambda_memory
   timeout         = var.lambda_timeout
 
-  depends_on = [null_resource.clone_repo]
+  depends_on = [
+    null_resource.clone_repo,
+    local_file.lambda_zip_trigger
+  ]
 
   environment {
     variables = {
