@@ -6,9 +6,9 @@ resource "null_resource" "clone_repo" {
 
   provisioner "local-exec" {
     command = <<EOF
-      rm -rf /tmp/monitors-api || true
-      git clone ${var.api_repository_url} /tmp/monitors-api
-      cd /tmp/monitors-api
+      rm -rf /tmp/monitor-api || true
+      git clone ${var.api_repository_url} /tmp/monitor-api
+      cd /tmp/monitor-api
       git checkout ${var.api_repository_branch}
       zip -r /tmp/lambda_function.zip .
     EOF

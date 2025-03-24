@@ -1,7 +1,7 @@
 variable "vercel_project_name" {
   description = "Name of the Vercel project"
   type        = string
-  default     = "monitors-client"
+  default     = "monitor-client"
 }
 
 variable "framework" {
@@ -81,13 +81,13 @@ variable "notification_email" {
 variable "aws_region" {
   description = "AWS region for Lambda deployment"
   type        = string
-  default     = "us-west-2"
+  default     = "us-east-1"
 }
 
 variable "lambda_name" {
   description = "Name of the Lambda function"
   type        = string
-  default     = "monitors-api"
+  default     = "monitor-api"
 }
 
 variable "api_stage_name" {

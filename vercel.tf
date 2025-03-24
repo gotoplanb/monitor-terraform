@@ -1,5 +1,5 @@
 # Create the Vercel project
-resource "vercel_project" "monitors_client" {
+resource "vercel_project" "monitor_client" {
   name      = var.vercel_project_name
   framework = var.framework
   git_repository = {
@@ -12,7 +12,7 @@ resource "vercel_project" "monitors_client" {
 resource "vercel_project_environment_variable" "env_vars" {
   for_each = var.environment_variables
 
-  project_id = vercel_project.monitors_client.id
+  project_id = vercel_project.monitor_client.id
   key        = each.key
   value      = each.value
   target     = ["production", "preview", "development"]
@@ -20,6 +20,6 @@ resource "vercel_project_environment_variable" "env_vars" {
 
 # Configure project settings
 resource "vercel_project_domain" "domain" {
-  project_id = vercel_project.monitors_client.id
+  project_id = vercel_project.monitor_client.id
   domain     = "${var.vercel_project_name}.vercel.app"
 } 

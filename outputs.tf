@@ -1,6 +1,6 @@
 output "project_id" {
   description = "The ID of the created Vercel project"
-  value       = vercel_project.monitors_client.id
+  value       = vercel_project.monitor_client.id
 }
 
 output "project_url" {

@@ -2,7 +2,7 @@
 resource "cloudflare_record" "app" {
   zone_id = var.cloudflare_zone_id
   name    = var.subdomain
-  value   = vercel_project_domain.domain.domain
+  content = vercel_project_domain.domain.domain
   type    = "CNAME"
   proxied = true
 }
@@ -10,7 +10,7 @@ resource "cloudflare_record" "app" {
 # Zero Trust Application
 resource "cloudflare_zero_trust_access_application" "app" {
   zone_id                   = var.cloudflare_zone_id
-  name                      = "Monitors Application"
+  name                      = "Monitor Application"
   domain                    = "${var.subdomain}.${var.domain_name}"
   type                      = "self_hosted"
   session_duration          = "24h"

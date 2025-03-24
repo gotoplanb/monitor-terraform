@@ -1,4 +1,4 @@
-# CLAUDE.md - Monitors Terraform Guidelines
+# CLAUDE.md - Monitor Terraform Guidelines
 
 ## Commands
 
