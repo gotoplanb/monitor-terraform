@@ -1,6 +1,37 @@
 # monitors-terraform
 
-## Setup state
+## Using the Makefile (Recommended)
+
+1. Copy the example environment file and fill in your credentials:
+   ```
+   cp .env.example .env
+   # Edit .env with your credentials
+   ```
+
+2. Run the entire deployment process with a single command:
+   ```
+   make
+   ```
+
+   This will:
+   - Set up the Terraform state backend in AWS
+   - Configure the main Terraform backend to use this state
+   - Deploy all infrastructure components
+   - Export outputs to an .env.output file
+
+3. Update Vercel environment variables with API URL:
+   ```
+   make update-vercel-env
+   ```
+
+For more options, run:
+```
+make help
+```
+
+## Manual Setup (Alternative)
+
+### Setup state
 
 1. update ./terraform-state/terraform.tfvars
 1. export AWS_ACCESS_KEY_ID="your_access_key"
@@ -10,7 +41,7 @@
 1. terraform init
 1. terraform apply
 
-## Run the other stuff
+### Run the other stuff
 
 1. Update the backend configuration in providers.tf with your state bucket and DynamoDB table:
    ```
