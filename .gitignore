@@ -1,3 +1,7 @@
+.env
+.env.output
+lambda_zip_created.txt
+
 # Local .terraform directories
 **/.terraform/*
 

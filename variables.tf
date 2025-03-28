@@ -79,7 +79,7 @@ variable "notification_email" {
 }
 
 variable "aws_region" {
-  description = "AWS region for Lambda deployment"
+  description = "AWS region"
   type        = string
   default     = "us-east-1"
 }
@@ -135,4 +135,4 @@ variable "readonly_users" {
   description = "List of email addresses allowed to use only GET requests"
   type        = list(string)
   default     = []
-} 
+}

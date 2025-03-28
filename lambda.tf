@@ -6,11 +6,13 @@ resource "null_resource" "clone_repo" {
 
   provisioner "local-exec" {
     command = <<EOF
+      set -e  # Exit on any error
       rm -rf /tmp/monitor-api || true
-      git clone ${var.api_repository_url} /tmp/monitor-api
-      cd /tmp/monitor-api
-      git checkout ${var.api_repository_branch}
-      zip -r /tmp/lambda_function.zip .
+      git clone ${var.api_repository_url} /tmp/monitor-api || exit 1
+      cd /tmp/monitor-api || exit 1
+      git checkout ${var.api_repository_branch} || exit 1
+      python3.13 -m pip install --platform manylinux2014_x86_64 --target . --implementation cp --python-version 3.13 --only-binary=:all: -r requirements.txt || exit 1
+      zip -r /tmp/lambda_function.zip . || exit 1
     EOF
   }
 }
@@ -53,9 +55,9 @@ resource "aws_lambda_function" "api" {
   role            = aws_iam_role.lambda_role.arn
   handler         = "app.main.handler"
   source_code_hash = local_file.lambda_zip_trigger.content_md5  # Use this as a trigger instead
-  runtime         = var.lambda_runtime
-  memory_size     = var.lambda_memory
-  timeout         = var.lambda_timeout
+  runtime         = "python3.13"
+  memory_size     = 256  # Recommend at least 256MB for FastAPI
+  timeout         = 30   # Increase timeout to handle potential Supabase latency
 
   depends_on = [
     null_resource.clone_repo,
@@ -65,9 +67,32 @@ resource "aws_lambda_function" "api" {
   environment {
     variables = {
       ENVIRONMENT = var.api_stage_name
-      # Add other environment variables your API needs
+      STATE_BUCKET_NAME = data.external.env.result.STATE_BUCKET_NAME
+      DYNAMODB_TABLE_NAME = data.external.env.result.DYNAMODB_TABLE_NAME
+      VERCEL_API_TOKEN = data.external.env.result.VERCEL_API_TOKEN
+      CLOUDFLARE_API_TOKEN = data.external.env.result.CLOUDFLARE_API_TOKEN
+      SUMOLOGIC_ACCESSID = data.external.env.result.SUMOLOGIC_ACCESSID
+      SUMOLOGIC_ACCESSKEY = data.external.env.result.SUMOLOGIC_ACCESSKEY
+      DATABASE_URL = data.external.env.result.DATABASE_URL
     }
   }
+
+}
+
+# Data source to read environment variables
+data "external" "env" {
+  program = ["sh", "-c", <<EOF
+    echo '{
+      "STATE_BUCKET_NAME": "'"$STATE_BUCKET_NAME"'",
+      "DYNAMODB_TABLE_NAME": "'"$DYNAMODB_TABLE_NAME"'",
+      "VERCEL_API_TOKEN": "'"$VERCEL_API_TOKEN"'",
+      "CLOUDFLARE_API_TOKEN": "'"$CLOUDFLARE_API_TOKEN"'",
+      "SUMOLOGIC_ACCESSID": "'"$SUMOLOGIC_ACCESSID"'",
+      "SUMOLOGIC_ACCESSKEY": "'"$SUMOLOGIC_ACCESSKEY"'",
+      "DATABASE_URL": "'$(echo $DATABASE_URL | sed 's/"/\\"/g')'"
+    }'
+EOF
+  ]
 }
 
 # API Gateway
